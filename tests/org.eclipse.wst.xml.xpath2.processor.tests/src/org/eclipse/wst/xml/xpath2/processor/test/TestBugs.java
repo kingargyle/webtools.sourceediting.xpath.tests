@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Standards for Technology in Automotive Retail and others.
+ * Copyright (c) 2009-2010 Standards for Technology in Automotive Retail and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,8 @@
  *  Mukul Gandhi    - bug 301539   fix for "context undefined" bug in case of zero
  *                                 arity of fn:name function.
  *  Mukul Gandhi    - bug 309585   implementation of xs:normalizedString data type                             
- * Jesper S Moller  - bug 311480 - fix problem with name matching on keywords 
+ * Jesper S Moller  - bug 311480 - fix problem with name matching on keywords
+ * Jesper S Moller  - bug 312191 - instance of test fails with partial matches
  *******************************************************************************/
 package org.eclipse.wst.xml.xpath2.processor.test;
 
