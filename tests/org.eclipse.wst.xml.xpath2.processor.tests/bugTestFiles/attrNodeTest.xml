@@ -1,5 +1,0 @@
-<Example>
-  <x mesg="hello" />
-  <x mesg="world" />
-  <x mesg="test" />
-</Example>
