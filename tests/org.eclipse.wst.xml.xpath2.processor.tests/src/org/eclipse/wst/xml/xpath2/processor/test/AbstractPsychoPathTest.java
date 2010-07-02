@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Standards for Technology in Automotive Retail and others.
+ * Copyright (c) 2009, 2010 Standards for Technology in Automotive Retail and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@
  *     Jesper S Moller - bug 275610 - Avoid big time and memory overhead for externals
  *     Jesper Steen Moeller - bug 282096 - make test harness handle all string encoding
  *     Jesper Steen Moller  - bug 280555 - Add pluggable collation support
+ *     Mukul Gandhi    - bug 280798 - PsychoPath support for JDK 1.4
  *******************************************************************************/
 package org.eclipse.wst.xml.xpath2.processor.test;
 
@@ -99,10 +100,8 @@ public class AbstractPsychoPathTest extends XMLTestCase {
 	private static final String IMPORT_SCHEMA_NAMESPACE = "import schema namespace";
 	private static final String REGEX_DN = " namespace\\s+(\\w[-_\\w]*)\\s*=\\s*['\"]([^;]*)['\"];";
 
-	private static HashMap<String, String> inputMap = new HashMap<String, String>(
-			3);
+	private static HashMap inputMap = new HashMap(3);
 
-	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		bundle = Platform
@@ -147,7 +146,6 @@ public class AbstractPsychoPathTest extends XMLTestCase {
 		is2.close();
 	}	
 
-	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		domDoc = null;
@@ -394,12 +392,11 @@ public class AbstractPsychoPathTest extends XMLTestCase {
 		return dc;
 	}
 
-	@SuppressWarnings("unchecked")
 	protected String buildResultString(ResultSequence rs) {
 		String actual = new String();
-		Iterator<AnyType> iterator = rs.iterator();
+		Iterator iterator = rs.iterator();
 		while (iterator.hasNext()) {
-			AnyType anyType = iterator.next();
+			AnyType anyType = (AnyType)iterator.next();
 			
 			actual = actual + anyType.string_value() + " ";
 		}
@@ -407,7 +404,6 @@ public class AbstractPsychoPathTest extends XMLTestCase {
 		return actual.trim();
 	}
 	
-	@SuppressWarnings("unchecked")
 	protected String buildXMLResultString(ResultSequence rs) throws Exception {
         DOMImplementationLS domLS = (DOMImplementationLS) domDoc.getImplementation().getFeature("LS", "3.0");
         LSOutput outputText = domLS.createLSOutput();
@@ -416,10 +412,10 @@ public class AbstractPsychoPathTest extends XMLTestCase {
         outputText.setByteStream(outputStream);
         
 		String actual = new String();
-		Iterator<NodeType> iterator = rs.iterator();
+		Iterator iterator = rs.iterator();
 		boolean queueSpace = false;
 		while (iterator.hasNext()) {
-			AnyType aat = iterator.next();
+			AnyType aat = (AnyType)iterator.next();
 			if (aat instanceof NodeType) {
 				NodeType nodeType = (NodeType) aat;
 				Node node = nodeType.node_value();

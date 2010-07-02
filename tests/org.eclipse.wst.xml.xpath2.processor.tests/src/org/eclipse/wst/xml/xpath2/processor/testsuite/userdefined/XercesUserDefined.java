@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 Standards for Technology in Automotive Retail and others
+ * Copyright (c) 2009, 2010 Standards for Technology in Automotive Retail and others
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     David Carver (STAR) - initial API and implementation 
+ *     Mukul Gandhi - bug 280798 - PsychoPath support for JDK 1.4
  *******************************************************************************/
 package org.eclipse.wst.xml.xpath2.processor.testsuite.userdefined;
 
@@ -27,8 +28,6 @@ public class XercesUserDefined extends CtrType {
 		this.typeInfo = typeInfo;
 	}
 	
-
-	@Override
 	public ResultSequence constructor(ResultSequence arg) throws DynamicError {
 			ResultSequence rs = ResultSequenceFactory.create_new();
 
@@ -44,18 +43,14 @@ public class XercesUserDefined extends CtrType {
 			return rs;
 	}
 
-
-	@Override
 	public String string_type() {
 		return null;
 	}
 
-	@Override
 	public String string_value() {
 		return value;
 	}
 	
-	@Override
 	public String type_name() {
 		return typeInfo.getName();
 	}

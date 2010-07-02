@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2009, 2010 Standards for Technology in Automotive Retail and others
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     David Carver (STAR) - initial API and implementation 
+ *     Mukul Gandhi - bug 280798 - PsychoPath support for JDK 1.4
+ *******************************************************************************/
+
 package org.eclipse.wst.xml.xpath2.processor.test;
 
 import java.io.FileNotFoundException;
@@ -9,8 +21,6 @@ import org.apache.xerces.xs.XSModel;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.eclipse.wst.xml.xpath2.processor.DefaultEvaluator;
@@ -23,19 +33,15 @@ import org.eclipse.wst.xml.xpath2.processor.XPathParserException;
 import org.eclipse.wst.xml.xpath2.processor.ast.XPath;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.AnyType;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.NodeType;
-import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 public class TestWTPDOMXPath2 extends AbstractPsychoPathTest {
 	IDOMModel model = null;
 
-	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
-	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (model != null) {
@@ -2764,12 +2770,11 @@ public class TestWTPDOMXPath2 extends AbstractPsychoPathTest {
 
 	   }
 	
-	@Override
 	protected String buildXMLResultString(ResultSequence rs) throws Exception {
-		Iterator<NodeType> iterator = rs.iterator();
+		Iterator iterator = rs.iterator();
 		StringBuffer buffer = new StringBuffer();
 		while (iterator.hasNext()) {
-			AnyType aat = iterator.next();
+			AnyType aat = (AnyType)iterator.next();
 			if (aat instanceof NodeType) {
 				NodeType nodeType = (NodeType) aat;
 				IDOMNode node = (IDOMNode) nodeType.node_value();
