@@ -41,7 +41,8 @@
  * Jesper S Moller  - bug 311480 - fix problem with name matching on keywords
  * Jesper S Moller  - bug 312191 - instance of test fails with partial matches
  * Mukul Gandhi     - bug 280798 - PsychoPath support for JDK 1.4
- *******************************************************************************/
+ * Mukul Gandhi     - bug 318313 - improvements to computation of typed values of nodes,
+ *                                 when validated by XML Schema primitive types *******************************************************************************/
 package org.eclipse.wst.xml.xpath2.processor.test;
 
 import java.net.URL;
@@ -80,9 +81,6 @@ public class TestBugs extends AbstractPsychoPathTest {
 				.getBundle("org.eclipse.wst.xml.xpath2.processor.tests");
 
 	}
-
-	
-
 
 	public void testNamesWhichAreKeywords() throws Exception {
 		// Bug 273719
@@ -1716,7 +1714,32 @@ public class TestBugs extends AbstractPsychoPathTest {
 		
 		assertTrue(testSuccess);
 	}
+	
+	public void testTypedValueEnhancement_primitiveTypes() throws Exception {
+		// Bug 318313
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug318313.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug318313.xsd");
 
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		String xpath = "X gt 99";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+
+		String actual = result.string_value();
+
+		assertEquals("true", actual);
+	}
+	
 	private CollationProvider createLengthCollatorProvider() {
 		return new CollationProvider() {
 			public Comparator get_collation(String name) {
