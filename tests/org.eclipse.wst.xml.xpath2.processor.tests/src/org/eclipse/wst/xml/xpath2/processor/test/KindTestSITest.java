@@ -12,8 +12,6 @@
 package org.eclipse.wst.xml.xpath2.processor.test;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;

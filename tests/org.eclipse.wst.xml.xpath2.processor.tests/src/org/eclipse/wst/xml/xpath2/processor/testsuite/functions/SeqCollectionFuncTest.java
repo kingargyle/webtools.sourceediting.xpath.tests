@@ -15,7 +15,6 @@ package org.eclipse.wst.xml.xpath2.processor.testsuite.functions;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.apache.xerces.xs.XSModel;
 import org.eclipse.wst.xml.xpath2.processor.*;

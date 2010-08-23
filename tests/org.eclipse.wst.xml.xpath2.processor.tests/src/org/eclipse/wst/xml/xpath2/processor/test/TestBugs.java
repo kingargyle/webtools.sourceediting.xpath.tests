@@ -1707,7 +1707,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 		
 		boolean testSuccess = false;
 		try {
-		  ResultSequence rs = eval.evaluate(path);
+		  eval.evaluate(path);
 		}
 		catch(DynamicError ex) {
 		  // a 'DynamicError' exception indicates, that this test is a success 
@@ -1744,7 +1744,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 		DynamicContext dc = setupDynamicContext(schema);
 
 		String xpath = "/element/attribute";
-		XPath path = compileXPath(dc, xpath);
+		compileXPath(dc, xpath);
 	}
 	
 }
