@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Jesper Steen Moller - initial API and implementation
+ *     Jesper Steen Moller - bug 313989 - Computation does not honour selection
  *******************************************************************************/
 
 package org.eclipse.wst.xml.xpath.ui.internal.views.tests;
@@ -196,6 +197,15 @@ public class TestXPathComputer extends TestCase {
 		assertEquals("true", ((Text)nl.item(0)).getTextContent());
 	}
 
+	public void testComputeNodeContextNode() throws Exception {
+		handler.toggleState("xpath2");
+
+		Document doc = createSimpleDocument();
+		NodeList nl = computeXPathInView("local-name(*[1])", doc.getFirstChild());
+		assertEquals(1, nl.getLength());
+		assertEquals("testNode1", ((Text)nl.item(0)).getTextContent());
+	}
+
 	private NodeList computeXPathInView(String xpathExpression, Node node) throws Exception, XPathExpressionException {
 		MockXPathView myMockView = new MockXPathView();
 		XPathComputer pathComputer = new XPathComputer(myMockView);
@@ -205,9 +215,5 @@ public class TestXPathComputer extends TestCase {
 		NodeList nl = myMockView.getLastList();
 		return nl;
 	}
-	
-	public void testToggleStateXpath2() throws Exception {
-		handler.toggleState("xpath2");
 
-	}	
 }
