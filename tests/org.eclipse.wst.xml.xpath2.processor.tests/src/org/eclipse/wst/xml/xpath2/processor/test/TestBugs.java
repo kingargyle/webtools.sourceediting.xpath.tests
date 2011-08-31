@@ -85,16 +85,12 @@ import org.eclipse.wst.xml.xpath2.api.StaticVariableResolver;
 import org.eclipse.wst.xml.xpath2.api.typesystem.ItemType;
 import org.eclipse.wst.xml.xpath2.api.typesystem.TypeDefinition;
 import org.eclipse.wst.xml.xpath2.api.typesystem.TypeModel;
-import org.eclipse.wst.xml.xpath2.processor.DefaultEvaluator;
-import org.eclipse.wst.xml.xpath2.processor.DynamicContext;
 import org.eclipse.wst.xml.xpath2.processor.DynamicError;
 import org.eclipse.wst.xml.xpath2.processor.Engine;
-import org.eclipse.wst.xml.xpath2.processor.Evaluator;
 import org.eclipse.wst.xml.xpath2.processor.ResultSequence;
 import org.eclipse.wst.xml.xpath2.processor.ResultSequenceFactory;
 import org.eclipse.wst.xml.xpath2.processor.StaticError;
 import org.eclipse.wst.xml.xpath2.processor.XPathParserException;
-import org.eclipse.wst.xml.xpath2.processor.ast.XPath;
 import org.eclipse.wst.xml.xpath2.processor.function.FnFunctionLibrary;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.XSBoolean;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.XSDecimal;
@@ -2457,143 +2453,6 @@ public class TestBugs extends AbstractPsychoPathTest {
 		actual = ((XSBoolean) rs.first()).getStringValue();
 		assertEquals("true", actual);
 	}
-	
-	/*   "added for future use"
-	 * 
-     public void testReverse_axes() throws Exception {
-		// Bug 353373
-		URL fileURL = bundle.getEntry("/bugTestFiles/bug353373_1.xml");
-		loadDOMDocument(fileURL);
-
-		// Get XML Schema Information for the Document
-		XSModel schema = getGrammar();
-
-		DynamicContext dc = setupDynamicContext(schema);
-
-		// test (a)
-		String xpath = "count(x/q/preceding-sibling::*) = 2";
-		XPath path = compileXPath(dc, xpath);
-		Evaluator eval = new DefaultEvaluator(dc, domDoc);
-		ResultSequence rs = eval.evaluate(path);
-		XSBoolean result = (XSBoolean) rs.first();
-		String actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (b)
-		xpath = "deep-equal((x/q/preceding-sibling::*[1]/name(),x/q/preceding-sibling::*[2]/name()),('p','uu'))";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (c)
-		xpath = "count(//u/preceding::*) = 7";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (d)
-		xpath = "deep-equal((//u/preceding::*[1]/name(),//u/preceding::*[2]/name(),//u/preceding::*[3]/name(),//u/preceding::*[4]/name(),//u/preceding::*[5]/name(),//u/preceding::*[6]/name(),//u/preceding::*[7]/name()), " +
-				           "('m2','m1','z','c','q','p','uu'))";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (e)
-		xpath = "count(//u/ancestor::*) = 2";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (f)
-		xpath = "deep-equal((//u/ancestor::*[1]/name(),//u/ancestor::*[2]/name()),('y','x'))";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (g)
-		xpath = "count(//u/ancestor-or-self::*) = 3";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (h)
-		xpath = "deep-equal((//u/ancestor-or-self::*[1]/name(),//u/ancestor-or-self::*[2]/name(),//u/ancestor-or-self::*[3]/name()),('u','y','x'))";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-	}
-	*/
-	
-	/*   "added for future use"
-	 * 
-	public void testForward_axes() throws Exception {
-		// Bug 353373
-		URL fileURL = bundle.getEntry("/bugTestFiles/bug353373_2.xml");
-		loadDOMDocument(fileURL);
-
-		// Get XML Schema Information for the Document
-		XSModel schema = getGrammar();
-
-		DynamicContext dc = setupDynamicContext(schema);
-
-		// test (a)
-		String xpath = "count(x/q/following-sibling::*) = 2";
-		XPath path = compileXPath(dc, xpath);
-		Evaluator eval = new DefaultEvaluator(dc, domDoc);
-		ResultSequence rs = eval.evaluate(path);
-		XSBoolean result = (XSBoolean) rs.first();
-		String actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (b)
-		xpath = "deep-equal((x/q/following-sibling::*[1]/name(),x/q/following-sibling::*[2]/name()),('c','y'))";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (c)
-		xpath = "count(//a5/following::*) = 8";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-		
-		// test (d)
-		xpath = "deep-equal((//n1/following::*[1]/name(),//n1/following::*[2]/name(),//n1/following::*[3]/name(),//n1/following::*[4]/name(),//n1/following::*[5]/name(),//n1/following::*[6]/name(),//n1/following::*[7]/name(),//n1/following::*[8]/name())," +
-				           "('p','q','c','y','z','m1','m2','u'))";
-		path = compileXPath(dc, xpath);
-		eval = new DefaultEvaluator(dc, domDoc);
-		rs = eval.evaluate(path);
-		result = (XSBoolean) rs.first();
-		actual = result.string_value();
-		assertEquals("true", actual);
-	} */
 	
 	private CollationProvider createLengthCollatorProvider() {
 		final CollationProvider oldProvider = getStaticContext().getCollationProvider();
