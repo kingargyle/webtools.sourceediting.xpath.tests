@@ -17,6 +17,7 @@
  *     Jesper Steen Moller  - bug 280555 - Add pluggable collation support
  *     Mukul Gandhi         - bug 338494 - prohibiting xpath expressions starting with / or // to be parsed.
  *     Jesper Steen Moller  - bug 340933 - Migrate tests to new XPath2 API
+ *     Lukasz Wycisk - bug 361802 - Default variable namespace Ð no namespace
  *******************************************************************************/
 package org.eclipse.wst.xml.xpath2.processor.test;
 
@@ -297,15 +298,14 @@ public class AbstractPsychoPathTest extends XMLTestCase {
 
    protected void setVariable(String name, AnyType value) {
 	   if (useNewApi) {
-		   String ns = staticContextBuilder.getDefaultNamespace();
 		   if (value != null) {
-				staticContextBuilder.withVariable(new javax.xml.namespace.QName(ns, 
+				staticContextBuilder.withVariable(new javax.xml.namespace.QName(
 						name), new SimpleAtomicItemTypeImpl(value.getTypeDefinition(), ItemType.OCCURRENCE_ONE));
 		   } else {		
-				staticContextBuilder.withVariable(new javax.xml.namespace.QName(ns, 
+				staticContextBuilder.withVariable(new javax.xml.namespace.QName( 
 						name), new SimpleAtomicItemTypeImpl(BuiltinTypeLibrary.XS_UNTYPEDATOMIC, ItemType.OCCURRENCE_OPTIONAL));
 		   }
-		   dynamicContextBuilder.withVariable(new javax.xml.namespace.QName(ns, name), value);
+		   dynamicContextBuilder.withVariable(new javax.xml.namespace.QName(name), value);
 	   } else {
 		   dynamicContext.set_variable(new QName(name), value);
 	   }
