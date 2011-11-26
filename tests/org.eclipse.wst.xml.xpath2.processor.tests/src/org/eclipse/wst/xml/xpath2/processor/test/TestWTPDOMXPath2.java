@@ -23,7 +23,7 @@ import org.eclipse.wst.xml.xpath2.processor.XPathParserException;
 import org.eclipse.wst.xml.xpath2.processor.ast.XPath;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.AnyType;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.NodeType;
-import org.eclipse.wst.xml.xpath2.wtptypes.XsdDOMTypeProvider;
+//import org.eclipse.wst.xml.xpath2.wtptypes.XsdDOMTypeProvider;
 import org.w3c.dom.Document;
 
 public class TestWTPDOMXPath2 extends AbstractPsychoPathTest {
@@ -70,6 +70,7 @@ public class TestWTPDOMXPath2 extends AbstractPsychoPathTest {
 //		DefaultTypeProviderRegistry.getInstance().register(DOMModelImpl.class, new XsdDOMTypeProvider());
 	}
 
+	/*
 	public void testWTPDOMWithTypes() throws Exception {
 		// Test for the fix, for xpathDefaultNamespace
 		bundle = Platform
@@ -91,7 +92,7 @@ public class TestWTPDOMXPath2 extends AbstractPsychoPathTest {
 		assertXPathTrue("not (/Example/x[2]/@mesg instance of attribute(mesg, xs:integer))", dc, domDoc);
 		assertXPathTrue("not (/Example/x[2]/@mesg instance of attribute(cesc, mesg_Type))", dc, domDoc);
 		assertXPathTrue("/Example/y/@intAttr instance of attribute(intAttr, xs:integer)", dc, domDoc);
-	}
+	} */
 
 	public void test_ForExpr005() throws Exception {
 		String inputFile = "/TestSources/fsx.xml";

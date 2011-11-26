@@ -33,7 +33,7 @@ public class AllPsychoPathTests {
 		suite.addTestSuite(TestSumAvg.class);
 		suite.addTestSuite(XPathDecimalFormatTest.class);
 		suite.addTestSuite(LiteralUtilsTest.class);
-		suite.addTestSuite(TestWTPDOMXPath2.class);
+		//suite.addTestSuite(TestWTPDOMXPath2.class);
 		suite.addTestSuite(KindTestSITest.class);
 		//$JUnit-END$
 		return suite;

@@ -52,7 +52,11 @@
  *                                 ID, IDREF and NMTOKEN.
  *  Mukul Gandhi    - bug 338494 - prohibiting xpath expressions starting with / or // to be parsed.
  *  Mukul Gandhi    - bug 338999 - improving compliance of function 'fn:subsequence'. implementing full arity support.
- *  Mukul Gandhi    - bug 339025 - fixes to fn:distinct-values function. ability to find distinct values on node items.                                
+ *  Mukul Gandhi    - bug 339025 - fixes to fn:distinct-values function. ability to find distinct values on node items.
+ *  Mukul Gandhi    - bug 341862 - improvements to computation of typed value of xs:boolean nodes.
+ *  Mukul Gandhi    - bug 343224 - allow user defined simpleType definitions to be available in in-scope schema types 
+ *  Mukul Gandhi    - bug 353373 - "preceding" & "following" axes behavior is erroneous
+ *  Mukul Gandhi	- bug 360306 - improvements to "resolve-QName" function and xs:QName type implementation                      
  *******************************************************************************/
 package org.eclipse.wst.xml.xpath2.processor.test;
 
@@ -84,6 +88,7 @@ import org.eclipse.wst.xml.xpath2.processor.internal.types.XSFloat;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.XSInteger;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.XSString;
 import org.osgi.framework.Bundle;
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 public class TestBugs extends AbstractPsychoPathTest {
@@ -100,7 +105,6 @@ public class TestBugs extends AbstractPsychoPathTest {
 				.getBundle("org.eclipse.wst.xml.xpath2.processor.tests");
 
 	}
-
 
 	public void testNamesWhichAreKeywords() throws Exception {
 		// Bug 273719
@@ -1374,10 +1378,11 @@ public class TestBugs extends AbstractPsychoPathTest {
 
 		DynamicContext dc = setupDynamicContext(schema);
 
-		assertXPathTrue("/Example/x instance of x_Type+", dc, domDoc);
+		assertXPathFalse("/Example/x instance of x_Type+", dc, domDoc);
+		assertXPathTrue("/Example/x instance of element(*, x_Type)+", dc, domDoc);
 		assertXPathTrue("/Example/x instance of element(x, x_Type)+", dc, domDoc);
 		assertXPathTrue("not (/Example/x instance of element(z, x_Type)+)", dc, domDoc);
-		assertXPathTrue("/Example/x[2]/@mesg instance of mesg_Type", dc, domDoc);
+		assertXPathFalse("/Example/x[2]/@mesg instance of mesg_Type", dc, domDoc);
 		assertXPathTrue("/Example/x[2]/@mesg instance of attribute(mesg, mesg_Type)", dc, domDoc);
 		assertXPathTrue("not (/Example/x[2]/@mesg instance of attribute(cesc, mesg_Type))", dc, domDoc);
 	}
@@ -2081,7 +2086,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 		String xpath = "$value castable as double";
 		XPath path = compileXPath(dc, xpath);
 
-		Evaluator eval = new DefaultEvaluator(dc, null);
+		Evaluator eval = new DefaultEvaluator(dc, (Document)null);
 		ResultSequence rs = eval.evaluate(path);
 
 		XSBoolean result = (XSBoolean) rs.first();
@@ -2257,6 +2262,459 @@ public class TestBugs extends AbstractPsychoPathTest {
 		rs = eval.evaluate(path);
 		actual = ((XSBoolean) rs.first()).string_value();
 		assertEquals("false", actual);
+	}
+	
+	public void testBug341862_TypedBooleanNode() throws Exception {
+		// bug 341862
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug341862.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug341862.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+		
+		DynamicContext dc = setupDynamicContext(schema);;		
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+
+		// test a)
+		String xpath = "/X/a[1] = true()";
+		XPath path = compileXPath(dc, xpath);		
+		ResultSequence rs = eval.evaluate(path);
+		String actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test b)
+		xpath = "/X/a[1]/@att = true()";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test c)
+		xpath = "/X/a[2] = true()";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test d)
+		xpath = "/X/a[2]/@att = true()";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test e)
+		xpath = "/X/a[3] = false()";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test f)
+		xpath = "/X/a[3]/@att = false()";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test g)
+		xpath = "/X/a[4] = false()";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test h)
+		xpath = "/X/a[4]/@att = false()";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testBug_343224() throws Exception {
+		// bug 343224
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug343224.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug343224.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+		
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		// test a)
+		String xpath = "X/a[1] castable as STATUS";
+		XPath path = compileXPath(dc, xpath);		
+		ResultSequence rs = eval.evaluate(path);
+		String actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test b)
+		xpath = "X/a[2] castable as STATUS";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test c)
+		xpath = "X/a[3] castable as STATUS";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("false", actual);
+	}
+	
+	public void testReverse_axes() throws Exception {
+		// Bug 353373
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug353373_1.xml");
+		loadDOMDocument(fileURL);
+
+		// Get XML Schema Information for the Document
+		XSModel schema = getGrammar();
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test (a)
+		String xpath = "count(x/q/preceding-sibling::*) = 2";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (b)
+		xpath = "deep-equal((x/q/preceding-sibling::*[1]/name(),x/q/preceding-sibling::*[2]/name()),('p','uu'))";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (c)
+		xpath = "count(//u/preceding::*) = 7";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (d)
+		xpath = "deep-equal((//u/preceding::*[1]/name(),//u/preceding::*[2]/name(),//u/preceding::*[3]/name(),//u/preceding::*[4]/name(),//u/preceding::*[5]/name(),//u/preceding::*[6]/name(),//u/preceding::*[7]/name()), " +
+				           "('m2','m1','z','c','q','p','uu'))";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (e)
+		xpath = "count(//u/ancestor::*) = 2";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (f)
+		xpath = "deep-equal((//u/ancestor::*[1]/name(),//u/ancestor::*[2]/name()),('y','x'))";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (g)
+		xpath = "count(//u/ancestor-or-self::*) = 3";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (h)
+		xpath = "deep-equal((//u/ancestor-or-self::*[1]/name(),//u/ancestor-or-self::*[2]/name(),//u/ancestor-or-self::*[3]/name()),('u','y','x'))";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testForward_axes() throws Exception {
+		// Bug 353373
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug353373_2.xml");
+		loadDOMDocument(fileURL);
+
+		// Get XML Schema Information for the Document
+		XSModel schema = getGrammar();
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test (a)
+		String xpath = "count(x/q/following-sibling::*) = 2";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (b)
+		xpath = "deep-equal((x/q/following-sibling::*[1]/name(),x/q/following-sibling::*[2]/name()),('c','y'))";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (c)
+		xpath = "count(//a5/following::*) = 8";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test (d)
+		xpath = "deep-equal((//n1/following::*[1]/name(),//n1/following::*[2]/name(),//n1/following::*[3]/name(),//n1/following::*[4]/name(),//n1/following::*[5]/name(),//n1/following::*[6]/name(),//n1/following::*[7]/name(),//n1/following::*[8]/name())," +
+				           "('p','q','c','y','z','m1','m2','u'))";
+		path = compileXPath(dc, xpath);
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testInstanceOf_1() throws Exception {
+		// Bug ??
+		// reusing files from another bug
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug276134.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug276134.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+		
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		// test a)
+		String xpath = "/person/@id instance of attribute(*, xs:integer)";
+		XPath path = compileXPath(dc, xpath);		
+		ResultSequence rs = eval.evaluate(path);
+		String actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test b)
+		xpath = "/person/@id instance of xs:integer";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("false", actual);
+	}
+	
+	public void testInstanceOf_2() throws Exception {
+		// Bug ??
+		// reusing files from another bug
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug276134.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug276134.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+		
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		// test a)
+		String xpath = "/person/fname instance of element(*, xs:string)";
+		XPath path = compileXPath(dc, xpath);		
+		ResultSequence rs = eval.evaluate(path);
+		String actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test b)
+		xpath = "/person/fname instance of xs:string";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("false", actual);
+	}
+	
+	public void testResolveQName_1() throws Exception {
+		// Bug 360306
+		URL fileURL = bundle.getEntry("/bugTestFiles/resQName.xml");
+		loadDOMDocument(fileURL);
+
+		// Get XML Schema Information for the Document
+		XSModel schema = getGrammar();
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test (a)
+		String xpath = "resolve-QName(/messages/message[1]/@kind, /messages) = xs:QName('xs:int')";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testBug_xx() throws Exception {
+		// Bug ??
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		// Get XML Schema Information for the Document
+		XSModel schema = getGrammar();
+
+		DynamicContext dc = setupDynamicContext(schema);
+		dc.add_namespace("p", "http://cta023.com/p");
+
+		// test (a)
+		String xpath = "namespace-uri-from-QName(xs:QName('p:ppp')) = 'http://cta023.com/p'";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testBug_xx11() throws Exception {
+		// Bug ??
+		URL fileURL = bundle.getEntry("/bugTestFiles/xx1.xml");
+		loadDOMDocument(fileURL);
+
+		// Get XML Schema Information for the Document
+		XSModel schema = getGrammar();
+
+		DynamicContext dc = setupDynamicContext(schema);
+		dc.add_namespace("a", "http://x.y");
+
+		String xpath = "namespace-uri-from-QName(node-name(a:X)) = 'http://x.y'";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testNonDocumentNodeAsRoot() throws Exception {
+		// Bug ??
+		// reusing files from another bug
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug276134.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug276134.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+		
+		Evaluator eval = new DefaultEvaluator(dc, domDoc, domDoc.getDocumentElement());
+		
+		// test a)
+		String xpath = ". is root()";
+		XPath path = compileXPath(dc, xpath);		
+		ResultSequence rs = eval.evaluate(path);
+		String actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+		
+		// test b)
+		xpath = "empty(..)";
+		path = compileXPath(dc, xpath);		
+		rs = eval.evaluate(path);
+		actual = ((XSBoolean) rs.first()).string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testFnIndexOf_onQName() throws Exception {
+		// bug ??
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug338999.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug338999.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		String xpath = "index-of(for $e in X/* return node-name($e), node-name(X/b))";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		assertTrue(rs.size() > 0);
+		String actual = ((XSInteger) rs.first()).string_value();
+		assertEquals("2", actual);
+	}
+	
+	public void testFnIndexOf_onQName2() throws Exception {
+		// bug ??
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug338999.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug338999.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		String xpath = "index-of(for $e in X/* return node-name($e), xs:QName('b'))";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		assertTrue(rs.size() > 0);
+		String actual = ((XSInteger) rs.first()).string_value();
+		assertEquals("2", actual);
+	}
+	
+	public void testFnIndexOf_onQName3() throws Exception {
+		// bug ??
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug338999.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug338999.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		String xpath = "index-of(for $e in X/* return node-name($e), fn:QName('', 'b'))";
+		XPath path = compileXPath(dc, xpath);
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		assertTrue(rs.size() > 0);
+		String actual = ((XSInteger) rs.first()).string_value();
+		assertEquals("2", actual);
 	}
 	
 	private CollationProvider createLengthCollatorProvider() {
