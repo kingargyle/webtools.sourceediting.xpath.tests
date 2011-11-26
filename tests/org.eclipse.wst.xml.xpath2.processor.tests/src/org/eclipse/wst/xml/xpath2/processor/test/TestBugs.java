@@ -2503,7 +2503,8 @@ public class TestBugs extends AbstractPsychoPathTest {
 	}
 	
 	public void testInstanceOf_1() throws Exception {
-		// Bug ??
+		// improvements to "instance of" checks
+		
 		// reusing files from another bug
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug276134.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug276134.xsd");
@@ -2533,7 +2534,8 @@ public class TestBugs extends AbstractPsychoPathTest {
 	}
 	
 	public void testInstanceOf_2() throws Exception {
-		// Bug ??
+		// improvements to "instance of" checks
+		
 		// reusing files from another bug
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug276134.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug276134.xsd");
@@ -2582,8 +2584,9 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals("true", actual);
 	}
 	
-	public void testBug_xx() throws Exception {
-		// Bug ??
+	public void testBug_namespaceUriFromQName_1() throws Exception {
+		// improving implementation of fn:namespace-uri-from-QName
+		
 		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
 		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
 		loadDOMDocument(fileURL);
@@ -2604,9 +2607,10 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals("true", actual);
 	}
 	
-	public void testBug_xx11() throws Exception {
-		// Bug ??
-		URL fileURL = bundle.getEntry("/bugTestFiles/xx1.xml");
+	public void testBug_namespaceUriFromQName_2() throws Exception {
+		// improving implementation of fn:namespace-uri-from-QName
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/namespaceUriFromQName_bug.xml");
 		loadDOMDocument(fileURL);
 
 		// Get XML Schema Information for the Document
@@ -2625,7 +2629,8 @@ public class TestBugs extends AbstractPsychoPathTest {
 	}
 	
 	public void testNonDocumentNodeAsRoot() throws Exception {
-		// Bug ??
+		// a non-document node as root node of the XDM tree. introducing a new argument to DefaultEvaluator. 
+		
 		// reusing files from another bug
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug276134.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug276134.xsd");
@@ -2654,8 +2659,9 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals("true", actual);
 	}
 	
-	public void testFnIndexOf_onQName() throws Exception {
-		// bug ??
+	public void testFnIndexOf_onQName1() throws Exception {
+		// fn:index-of finding QName values
+		
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug338999.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug338999.xsd");
 
@@ -2676,7 +2682,8 @@ public class TestBugs extends AbstractPsychoPathTest {
 	}
 	
 	public void testFnIndexOf_onQName2() throws Exception {
-		// bug ??
+		// fn:index-of finding QName values
+		
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug338999.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug338999.xsd");
 
@@ -2697,7 +2704,8 @@ public class TestBugs extends AbstractPsychoPathTest {
 	}
 	
 	public void testFnIndexOf_onQName3() throws Exception {
-		// bug ??
+		// fn:index-of finding QName values
+		
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug338999.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug338999.xsd");
 
