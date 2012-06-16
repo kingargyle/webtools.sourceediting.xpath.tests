@@ -116,7 +116,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 
 		DynamicContext dc = setupDynamicContext(schema);
 
-//		String xpath = "($input-context/atomic:root/atomic:integer) union ($input-context/atomic:root/atomic:integer)";
+        // String xpath = "($input-context/atomic:root/atomic:integer) union ($input-context/atomic:root/atomic:integer)";
 		String xpath = "(/element/eq eq 'eq') or //child::xs:*";
 		XPath path = compileXPath(dc, xpath);
 
@@ -2724,6 +2724,54 @@ public class TestBugs extends AbstractPsychoPathTest {
 		String actual = ((XSInteger) rs.first()).string_value();
 		assertEquals("2", actual);
 	}
+	
+	public void testXSDateTimeCast() throws Exception {
+		// test explicit casts on xs:dateTime node references
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/dateTime1.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/dateTime1.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test a)
+		String xpath = "exists(xs:dateTime(/test/@t1))";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b)
+		xpath = "/test/@t1 instance of attribute(t1, xs:dateTime)";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test c)
+		xpath = "(xs:dateTime(/test/@t1) + xs:dayTimeDuration('P1D')) eq xs:dateTime('2010-10-06T10:05:05')";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
 	
 	private CollationProvider createLengthCollatorProvider() {
 		return new CollationProvider() {
