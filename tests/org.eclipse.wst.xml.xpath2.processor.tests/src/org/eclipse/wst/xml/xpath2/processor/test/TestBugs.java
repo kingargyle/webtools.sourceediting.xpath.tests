@@ -2772,6 +2772,64 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals("true", actual);
 	}
 	
+	public void testBug_362026() throws Exception {
+		// "instance of" must not atomize the LHS before the comparison check
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug362026.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug362026.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test a)
+		String xpath = "/X/Y instance of xs:integer";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("false", actual);
+		
+		// test b)
+		xpath = "/X/@att1 instance of xs:string";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("false", actual);
+		
+		// test c)
+		xpath = "/X/Y instance of element(*, xs:integer)";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test d)
+		xpath = "/X/@att1 instance of attribute(*, xs:string)";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
 	
 	private CollationProvider createLengthCollatorProvider() {
 		return new CollationProvider() {
