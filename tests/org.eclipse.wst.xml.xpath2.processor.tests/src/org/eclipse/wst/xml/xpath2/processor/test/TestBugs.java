@@ -56,7 +56,8 @@
  *  Mukul Gandhi    - bug 341862 - improvements to computation of typed value of xs:boolean nodes.
  *  Mukul Gandhi    - bug 343224 - allow user defined simpleType definitions to be available in in-scope schema types 
  *  Mukul Gandhi    - bug 353373 - "preceding" & "following" axes behavior is erroneous
- *  Mukul Gandhi	- bug 360306 - improvements to "resolve-QName" function and xs:QName type implementation                      
+ *  Mukul Gandhi	- bug 360306 - improvements to "resolve-QName" function and xs:QName type implementation
+ *  Mukul Gandhi	- bug 393904 - improvements to computing typed value of element nodes                    
  *******************************************************************************/
 package org.eclipse.wst.xml.xpath2.processor.test;
 
@@ -87,6 +88,7 @@ import org.eclipse.wst.xml.xpath2.processor.internal.types.XSDuration;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.XSFloat;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.XSInteger;
 import org.eclipse.wst.xml.xpath2.processor.internal.types.XSString;
+import org.eclipse.wst.xml.xpath2.processor.internal.types.XSUntypedAtomic;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -2828,6 +2830,134 @@ public class TestBugs extends AbstractPsychoPathTest {
 		result = (XSBoolean) rs.first();
 		actual = result.string_value();
 		assertEquals("true", actual);
+	}
+	
+	public void testBug_393904_1() throws Exception {
+		// improvements to computing typed value of element nodes
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug393904_1.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug393904_1.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test a) : typed value for element-only content
+		String xpath = "data(/Elem)";
+		XPath path = compileXPath(dc, xpath);
+
+		boolean isException = false;
+		try {
+		  Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		  ResultSequence rs = eval.evaluate(path);
+		  if (!isException) {
+		     assertTrue(false);
+		  }
+		}
+		catch(DynamicError ex) {		  
+		   if ("FOTY0012".equals(ex.code())) {
+			   // if this DynamicError occurs, its a test success 
+			   isException = true; 
+		   }
+		}
+		
+		// test b) : typed value for mixed content
+		xpath = "/Elem/Y/count(data(.))";
+		path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+		XSInteger result = (XSInteger) rs.first();
+		assertEquals(true, result.int_value().equals(BigInteger.valueOf(1)));
+		
+		// test c) : typed value for mixed content
+		xpath = "/Elem/Y/normalize-space(string(data(.)))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		XSString result_str = (XSString) rs.first();
+		assertEquals("3 3 3", result_str.string_value());
+		
+		// test d) : typed value for mixed content
+		xpath = "/Elem/Y/string-length(data(.))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result = (XSInteger) rs.first();
+		assertEquals(14, result.int_value().intValue());
+		
+		// test e) : typed value for simple content
+		xpath = "/Elem/X/y[1][data(.) instance of xs:integer]/string()";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+		result_str = (XSString) rs.first();
+		assertEquals("2", result_str.string_value());
+	}
+	
+	public void testBug_393904_2() throws Exception {
+		// improvements to computing typed value of element nodes
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/bug393904_2.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bug393904_2.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test a) : complex type of an element node specifies an element-only content model,
+		//           but its descendant element is validated by a "skip" wild-card.
+		String xpath = "data(/X/Y)";
+		XPath path = compileXPath(dc, xpath);
+        
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSUntypedAtomic result = (XSUntypedAtomic) rs.first();
+		String actual = result.string_value();
+		assertEquals(true, "val_1".equals(actual.trim()));
+		
+		// test b) : complex type of an element node specifies an element-only content model,
+		//           but its descendant element is validated by a "lax" (which didn't 
+		//           find an element declaration) wild-card.
+		xpath = "data(/X/Z)";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSUntypedAtomic) rs.first();
+		actual = result.string_value();
+		assertEquals(true, "val_2".equals(actual.trim()));
+		
+		// test c) : complex type of an element node specifies an element-only content model. its
+		//           descendant element is validated by a "strict" wild-card.
+		xpath = "data(/X/U)";
+		path = compileXPath(dc, xpath);
+
+		boolean isException = false;
+		try {
+		  eval = new DefaultEvaluator(dc, domDoc);
+		  rs = eval.evaluate(path);
+		  if (!isException) {
+		     assertTrue(false);
+		  }
+		}
+		catch(DynamicError ex) {		  
+		   if ("FOTY0012".equals(ex.code())) {
+			   // if this DynamicError occurs, its a test success 
+			   isException = true; 
+		   }
+		}
 	}
 	
 	
