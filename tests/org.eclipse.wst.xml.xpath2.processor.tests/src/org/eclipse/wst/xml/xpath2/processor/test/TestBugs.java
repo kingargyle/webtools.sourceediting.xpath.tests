@@ -246,7 +246,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 
 		String actual = result.string_value();
 
-		assertEquals("false", actual);
+		assertEquals("true", actual);
 	}
 
 	public void testNormalizeSpaceFunctionBug274471() throws Exception {
@@ -2958,6 +2958,383 @@ public class TestBugs extends AbstractPsychoPathTest {
 			   isException = true; 
 		   }
 		}
+	}
+	
+	public void testBug_eq_operator() throws Exception {
+		// improvements to evaluation with "eq" operator
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing "eq" operator
+		String xpath = "1 eq '1'";
+		XPath path = compileXPath(dc, xpath);        
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		ResultSequence rs = null;
+		boolean isException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isException) {
+			  assertTrue(false);
+		   }
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test b) : testing "eq" operator
+		xpath = "'1' eq 1";
+		path = compileXPath(dc, xpath);        
+		eval = new DefaultEvaluator(dc, domDoc);
+
+		rs = null;
+		isException = false;
+		try {
+			rs = eval.evaluate(path);
+			if (!isException) {
+				assertTrue(false);
+			}
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test c) : testing "eq" operator via deep-equal function 		
+		xpath = "deep-equal((1), ('1'))";
+		path = compileXPath(dc, xpath);
+        
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("false", actual);
+		
+		// test d) : testing "eq" operator via deep-equal function		
+		xpath = "deep-equal(('1'), (1))";
+		path = compileXPath(dc, xpath);
+        
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("false", actual);
+	}
+	
+	public void testBug_lt_operator() throws Exception {
+		// improvements to evaluation with "lt" operator
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing "lt" operator
+		String xpath = "1 lt '5'";
+		XPath path = compileXPath(dc, xpath);        
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		ResultSequence rs = null;
+		boolean isException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isException) {
+			  assertTrue(false);
+		   }
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test b) : testing "lt" operator
+		xpath = "'3' lt 7";
+		path = compileXPath(dc, xpath);        
+		eval = new DefaultEvaluator(dc, domDoc);
+
+		rs = null;
+		isException = false;
+		try {
+			rs = eval.evaluate(path);
+			if (!isException) {
+				assertTrue(false);
+			}
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test c) : testing "lt" operator		
+		xpath = "1 lt 5";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testBug_gt_operator() throws Exception {
+		// improvements to evaluation with "gt" operator
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing "gt" operator
+		String xpath = "5 gt '1'";
+		XPath path = compileXPath(dc, xpath);        
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		ResultSequence rs = null;
+		boolean isException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isException) {
+			  assertTrue(false);
+		   }
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test b) : testing "gt" operator
+		xpath = "'3' gt 1";
+		path = compileXPath(dc, xpath);        
+		eval = new DefaultEvaluator(dc, domDoc);
+
+		rs = null;
+		isException = false;
+		try {
+			rs = eval.evaluate(path);
+			if (!isException) {
+				assertTrue(false);
+			}
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test c) : testing "gt" operator		
+		xpath = "5 gt 1";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void test_ge_operator() throws Exception {
+		// test case for "ge" operator
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing "ge" operator
+		String xpath = "5 ge '1'";
+		XPath path = compileXPath(dc, xpath);        
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		ResultSequence rs = null;
+		boolean isException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isException) {
+			  assertTrue(false);
+		   }
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test b) : testing "ge" operator
+		xpath = "'5' ge 3";
+		path = compileXPath(dc, xpath);        
+		eval = new DefaultEvaluator(dc, domDoc);
+
+		rs = null;
+		isException = false;
+		try {
+			rs = eval.evaluate(path);
+			if (!isException) {
+				assertTrue(false);
+			}
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test c) : testing "ge" operator		
+		xpath = "5 ge 1";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void test_le_operator() throws Exception {
+		// test case for "le" operator
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing "le" operator
+		String xpath = "5 le '8'";
+		XPath path = compileXPath(dc, xpath);        
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		ResultSequence rs = null;
+		boolean isException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isException) {
+			  assertTrue(false);
+		   }
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test b) : testing "le" operator
+		xpath = "'5' le 10";
+		path = compileXPath(dc, xpath);        
+		eval = new DefaultEvaluator(dc, domDoc);
+
+		rs = null;
+		isException = false;
+		try {
+			rs = eval.evaluate(path);
+			if (!isException) {
+				assertTrue(false);
+			}
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test c) : testing "le" operator		
+		xpath = "2 le 5";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void test_ne_operator() throws Exception {
+		// test case for "ne" operator
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing "ne" operator
+		String xpath = "5 ne '8'";
+		XPath path = compileXPath(dc, xpath);        
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		
+		ResultSequence rs = null;
+		boolean isException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isException) {
+			  assertTrue(false);
+		   }
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test b) : testing "ne" operator
+		xpath = "'5' ne 10";
+		path = compileXPath(dc, xpath);        
+		eval = new DefaultEvaluator(dc, domDoc);
+
+		rs = null;
+		isException = false;
+		try {
+			rs = eval.evaluate(path);
+			if (!isException) {
+				assertTrue(false);
+			}
+		}
+		catch (DynamicError err) {
+			if ("XPTY0004".equals(err.code())) {
+				// if this DynamicError occurs, its a test success
+				isException = true;
+			}
+		}
+		
+		// test c) : testing "ne" operator		
+		xpath = "1 ne 10";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
 	}
 	
 	
