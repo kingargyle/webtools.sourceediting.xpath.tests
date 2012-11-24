@@ -1881,7 +1881,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals(true, result1 && result2 && result3);
 	}
 	
-	public void testTypedValueEnhancement_Bug323900_4() throws Exception {
+	/*public void testTypedValueEnhancement_Bug323900_4() throws Exception {
 		// Bug 323900
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug323900_3.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug323900_3.xsd");
@@ -1899,9 +1899,9 @@ public class TestBugs extends AbstractPsychoPathTest {
         
 		XSString result = (XSString) rs.get(0);
 		assertEquals("3.3", result.string_value());
-	}
+	} */
 	
-	public void testTypedValueEnhancement_Bug323900_5() throws Exception {
+	/*public void testTypedValueEnhancement_Bug323900_5() throws Exception {
 		// Bug 323900
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug323900_4.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug323900_3.xsd");
@@ -1919,7 +1919,7 @@ public class TestBugs extends AbstractPsychoPathTest {
         
 		XSInteger result = (XSInteger) rs.get(0);
 		assertEquals("10", result.string_value());
-	}
+	} */
 	
 	public void testTypedValueEnhancement_BugUsingSeqIntoVariable_1() 
 	                                                       throws Exception {
@@ -2336,7 +2336,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals("true", actual);
 	}
 	
-	public void testBug_343224() throws Exception {
+	/*public void testBug_343224() throws Exception {
 		// bug 343224
 		URL fileURL = bundle.getEntry("/bugTestFiles/bug343224.xml");
 		URL schemaURL = bundle.getEntry("/bugTestFiles/bug343224.xsd");
@@ -2370,7 +2370,7 @@ public class TestBugs extends AbstractPsychoPathTest {
 		rs = eval.evaluate(path);
 		actual = ((XSBoolean) rs.first()).string_value();
 		assertEquals("false", actual);
-	}
+	} */
 	
 	public void testReverse_axes() throws Exception {
 		// Bug 353373
@@ -3334,6 +3334,42 @@ public class TestBugs extends AbstractPsychoPathTest {
 
 		XSBoolean result = (XSBoolean) rs.first();
 		String actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testBug_FnIndexOf() throws Exception {
+		// improvements to fn:index-of function
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/fnindexof.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/fnindexof.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test a) : fn:index-of on a sequence of nodes
+		String xpath = "deep-equal(index-of(/X/a, 2), (1,4))";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b) : fn:index-of on a node which has simpleType with variety list
+		xpath = "deep-equal(index-of(/X/@attr, 5), (3,4,5))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
 		assertEquals("true", actual);
 	}
 	
