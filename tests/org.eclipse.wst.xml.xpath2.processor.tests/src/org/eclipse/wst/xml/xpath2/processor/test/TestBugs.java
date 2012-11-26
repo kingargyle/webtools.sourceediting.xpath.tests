@@ -3373,6 +3373,158 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals("true", actual);
 	}
 	
+	public void testBug_FnDistinctValues() throws Exception {
+		// improvements to fn:distinct-values function
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing distinct-values on a heterogeneous constant list  
+		String xpath = "deep-equal(distinct-values((1, '1')), (1, '1'))";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b) : testing distinct-values on a heterogeneous constant list (with items reversed) 
+		xpath = "deep-equal(distinct-values(('1', 1)), ('1', 1))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test c) : testing distinct-values on a homogeneous constant list 
+		xpath = "deep-equal(distinct-values((1, 1)), (1))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test d) : testing distinct-values on a homogeneous constant list (with data-types of items changed)
+		xpath = "deep-equal(distinct-values(('1', '1')), ('1'))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test e) : testing distinct-values on a sequence of xs:untypedAtomic values 		
+		xpath = "count(distinct-values((xs:untypedAtomic('cherry'), xs:untypedAtomic('bar'), xs:untypedAtomic('bar')))) eq 2";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test f) : testing distinct-values on a sequence of xs:untypedAtomic values. checking the type annotation of each item of result.			
+		xpath = "every $x in distinct-values((xs:untypedAtomic('cherry'), xs:untypedAtomic('bar'), xs:untypedAtomic('bar'))) satisfies $x instance of xs:untypedAtomic";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test g) : testing distinct-values on a sequence of xs:untypedAtomic values. has a fix for fn:deep-equal as well.			
+		xpath = "deep-equal(distinct-values((xs:untypedAtomic('cherry'), xs:untypedAtomic('bar'), xs:untypedAtomic('bar'))), (xs:untypedAtomic('cherry'), xs:untypedAtomic('bar')))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test h) : testing distinct-values on a sequence of xs:untypedAtomic values. has a fix for fn:deep-equal as well.			
+		xpath = "deep-equal(distinct-values((xs:untypedAtomic('cherry'), xs:untypedAtomic('bar'), xs:untypedAtomic('bar'))), (xs:untypedAtomic('cherry'), xs:string('bar')))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testBug_FloatingPoint_zeroComparison() throws Exception {
+		// improvements to xs:float & xs:double 0 and -0 equality comparisons
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing that xs:float 0 = -0 
+		String xpath = "xs:float('0') eq xs:float('-0')";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b) : testing that xs:float 0 = -0 
+		xpath = "xs:float('-0') eq xs:float('0')";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test c) : testing that xs:double 0 = -0
+		xpath = "xs:double('0') eq xs:double('-0')";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test d) : testing that xs:double 0 = -0
+		xpath = "xs:double('-0') eq xs:double('0')";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
 	
 	private CollationProvider createLengthCollatorProvider() {
 		return new CollationProvider() {
