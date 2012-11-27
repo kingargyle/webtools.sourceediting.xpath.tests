@@ -3525,6 +3525,108 @@ public class TestBugs extends AbstractPsychoPathTest {
 		assertEquals("true", actual);
 	}
 	
+	public void testBug_FnMax() throws Exception {
+		// improvements to fn:max implementation
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing fn:max on xs:date members 
+		String xpath = "max((xs:date('2001-01-01'), xs:date('2002-01-01'), xs:date('2005-01-01'))) eq xs:date('2005-01-01')";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b) : testing fn:max on xs:date members 
+		xpath = "max((current-date(), xs:date('2001-01-01'))) eq current-date()";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test c) : testing an erroneous member in input sequence
+		xpath = "empty(max((3,4,'Zero')))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		boolean isDesiredException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isDesiredException) {
+			 assertTrue(false);  
+		   }
+		}
+		catch(DynamicError err) {
+			if ("FORG0006".equals(err.code())) {
+			    // this exception indicates test success
+				isDesiredException = true;
+			}
+		}
+	}
+	
+	public void testBug_FnMin() throws Exception {
+		// improvements to fn:min implementation
+		
+		bundle = Platform.getBundle("org.w3c.xqts.testsuite");
+		URL fileURL = bundle.getEntry("/TestSources/emptydoc.xml");
+		loadDOMDocument(fileURL);
+
+		DynamicContext dc = setupDynamicContext(null);
+
+		// test a) : testing fn:min on xs:date members 
+		String xpath = "min((xs:date('2001-01-01'), xs:date('2002-01-01'), xs:date('2005-01-01'))) eq xs:date('2001-01-01')";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b) : testing fn:min on xs:date members 
+		xpath = "min((current-date(), xs:date('2001-01-01'))) eq xs:date('2001-01-01')";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test c) : testing an erroneous member in input sequence
+		xpath = "empty(min((3,4,'Zero')))";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		boolean isDesiredException = false;
+		try {
+		   rs = eval.evaluate(path);
+		   if (!isDesiredException) {
+			 assertTrue(false);  
+		   }
+		}
+		catch(DynamicError err) {
+			if ("FORG0006".equals(err.code())) {
+			    // this exception indicates test success
+				isDesiredException = true;
+			}
+		}
+	}
+	
 	
 	private CollationProvider createLengthCollatorProvider() {
 		return new CollationProvider() {
