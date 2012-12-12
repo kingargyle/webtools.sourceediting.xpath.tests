@@ -3627,6 +3627,100 @@ public class TestBugs extends AbstractPsychoPathTest {
 		}
 	}
 	
+	public void testBug_FnAggregateFunctions_1() throws Exception {
+		// improvements to aggregate functions. ability to accept element nodes for functions like fn:max and fn:min.
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/bugagg_1.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bugagg_1.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test a) : fn:max on a sequence of element nodes
+		String xpath = "max(/root/val) eq 10";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b) : fn:min on a sequence of element nodes
+		xpath = "min(/root/val) eq 2";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test c) : fn:avg on a sequence of element nodes
+		xpath = "avg(/root/val) eq 6";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
+	public void testBug_FnAggregateFunctions_2() throws Exception {
+		// improvements to aggregate functions. ability to accept attribute nodes for functions like fn:max and fn:min.
+		
+		URL fileURL = bundle.getEntry("/bugTestFiles/bugagg_2.xml");
+		URL schemaURL = bundle.getEntry("/bugTestFiles/bugagg_2.xsd");
+
+		loadDOMDocument(fileURL, schemaURL);
+
+		// Get XSModel object for the Schema
+		XSModel schema = getGrammar(schemaURL);
+
+		DynamicContext dc = setupDynamicContext(schema);
+
+		// test a) : fn:max on a sequence of attribute nodes
+		String xpath = "max(/root/x/@val) eq 10";
+		XPath path = compileXPath(dc, xpath);
+
+		Evaluator eval = new DefaultEvaluator(dc, domDoc);
+		ResultSequence rs = eval.evaluate(path);
+
+		XSBoolean result = (XSBoolean) rs.first();
+		String actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test b) : fn:min on a sequence of attribute nodes
+		xpath = "min(/root/x/@val) eq 2";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+		
+		// test c) : fn:avg on a sequence of attribute nodes
+		xpath = "avg(/root/x/@val) eq 6";
+		path = compileXPath(dc, xpath);
+
+		eval = new DefaultEvaluator(dc, domDoc);
+		rs = eval.evaluate(path);
+
+		result = (XSBoolean) rs.first();
+		actual = result.string_value();
+		assertEquals("true", actual);
+	}
+	
 	
 	private CollationProvider createLengthCollatorProvider() {
 		return new CollationProvider() {
